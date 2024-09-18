@@ -1,6 +1,30 @@
-import React from "react";
+import React, { useState } from "react";
+import axios from 'axios';
 
 const Footer = () => {
+  const [email, setEmail] = useState('');
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setSuccess('');
+
+    try {
+      const response = await axios.post('http://localhost:5000/api/Subscription/subscribe', { email });
+      setSuccess('Subscription successful!');
+      setEmail(''); // Clear the input field
+    } catch (error) {
+      // Check if the error has a response
+      if (error.response && error.response.data && error.response.data.message) {
+        setError(error.response.data.message); // Set error message from server response
+      } else {
+        setError('Failed to subscribe. Please try again.'); // Fallback error message
+      }
+    }
+  };
+
   return (
     <div className="bg-green-600 text-white py-10 px-5 w-full">
       <div className="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-10">
@@ -45,11 +69,14 @@ const Footer = () => {
           <p className="text-sm text-white mb-4">
             Subscribe to get updates about our latest activities.
           </p>
-          <form className="flex space-x-2">
+          <form onSubmit={handleSubmit} className="flex space-x-2">
             <input
               type="email"
               placeholder="Your Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               className="p-2 rounded-md text-gray-700"
+              required
             />
             <button
               type="submit"
@@ -58,6 +85,8 @@ const Footer = () => {
               Subscribe
             </button>
           </form>
+          {success && <p className="text-green-300 mt-2">{success}</p>}
+          {error && <p className="text-red-300 mt-2">{error}</p>}
         </div>
       </div>
 
